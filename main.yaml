@@ -3,42 +3,41 @@
   hosts: all
   become: yes
   tasks:
-    - name: nginx 컨테이너 배포
-      docker_container:
-        name: nginx
-        image: nginx
-        restart_policy: on-failure
-        networks:
-          - name: web
-        environment:
-          SERVICE_PORTS: 80
-        deploy:
-          replicas: 2
-          placement:
-            constraints: [node.role != manager]
-          resources:
-            limits:
-              cpus: '1'
-              memory: '32M'
-
-    - name: proxy 컨테이너 배포
-      docker_container:
-        name: proxy
-        image: dockercloud/haproxy
-        depends_on: nginx
-        ports:
-          - "8000:80"
-        volumes:
-          - "/var/run/docker.sock:/var/run/docker.sock"
-        networks:
-          - name: web
-        deploy:
-          mode: global
-          placement:
-            constraints: [node.role == manager]
-
-    - name: web 네트워크 생성
-      docker_network:
-        name: web
-        driver: overlay
+    - name: nginx 서비스 배포
+      docker_service:
+        project_src: /path/to/docker-compose.yml
         state: present
+        definition:
+          version: '3'
+          services:
+            nginx:
+              image: nginx
+              deploy:
+                replicas: 2
+                resources:
+                  limits:
+                    cpus: '1'
+                    memory: '32M'
+              environment:
+                SERVICE_PORTS: 80
+              networks:
+                - web
+
+            proxy:
+              image: dockercloud/haproxy
+              depends_on:
+                - nginx
+              volumes:
+                - /var/run/docker.sock:/var/run/docker.sock
+              ports:
+                - 8000:80
+              networks:
+                - web
+              deploy:
+                mode: global
+                placement:
+                  constraints: [node.role == manager]
+
+          networks:
+            web:
+              external: true
