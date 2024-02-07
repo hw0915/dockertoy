@@ -5,7 +5,7 @@
   tasks:
     - name: 배포를 위한 Docker service 실행
       docker_service:
-        state: started
+        state: present
 
     - name: nginx 서비스 배포
       docker_container:
