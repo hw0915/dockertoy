@@ -1,6 +1,6 @@
 ---
 - name: 배포하기
-  hosts: manager
+  hosts: all
   become: yes
   tasks:
     - name: nginx 컨테이너 배포
