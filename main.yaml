@@ -4,4 +4,4 @@
   become: yes
   tasks:
     - name: Deploy stack
-      command: "docker stack deploy -c web.yml web
+      command: "docker stack deploy -c web.yml web"
