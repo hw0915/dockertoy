@@ -5,6 +5,6 @@
   tasks:
     - name: nginx와 proxy 서비스 배포
       docker_compose:
-        project_src: /home/user1/web.yaml # Docker Compose 파일의 경로로 수정해야 합니다.
+        project_src: /home/user1/docker-compose.yml # Docker Compose 파일의 경로로 수정해야 합니다.
         project_name: my_project  # 프로젝트 이름을 지정합니다.
         state: present
