@@ -4,39 +4,7 @@
   become: yes
   tasks:
     - name: nginx와 proxy 서비스 배포
-      docker_service:
+      docker_compose:
+        project_src: /home/user1/web.yaml # Docker Compose 파일의 경로로 수정해야 합니다.
+        project_name: my_project  # 프로젝트 이름을 지정합니다.
         state: present
-        definition:
-          version: '3'
-          services:
-            nginx:
-              image: nginx
-              deploy:
-                replicas: 2
-                resources:
-                  limits:
-                    cpus: '1'
-                    memory: '32M'
-              environment:
-                SERVICE_PORTS: 80
-              networks:
-                - web
-
-            proxy:
-              image: dockercloud/haproxy
-              depends_on:
-                - nginx
-              volumes:
-                - /var/run/docker.sock:/var/run/docker.sock
-              ports:
-                - 8000:80
-              networks:
-                - web
-              deploy:
-                mode: global
-                placement:
-                  constraints: [node.role == manager]
-
-          networks:
-            web:
-              external: true
