@@ -1,21 +1,17 @@
 ---
-- name: nginx와 proxy 서비스 배포
-  hosts: all
+- name: 배포하기
+  hosts: manager
   become: yes
   tasks:
-    - name: 배포를 위한 Docker service 실행
-      docker_service:
-        state: present
-
-    - name: nginx 서비스 배포
+    - name: nginx 컨테이너 배포
       docker_container:
         name: nginx
         image: nginx
-        restart_policy: on-failure:3
-        environment:
-          SERVICE_PORTS: 80
+        restart_policy: on-failure
         networks:
           - name: web
+        environment:
+          SERVICE_PORTS: 80
         deploy:
           replicas: 2
           placement:
@@ -25,13 +21,13 @@
               cpus: '1'
               memory: '32M'
 
-    - name: proxy 서비스 배포
+    - name: proxy 컨테이너 배포
       docker_container:
         name: proxy
         image: dockercloud/haproxy
         depends_on: nginx
         ports:
-          - "8000:8000"
+          - "8000:80"
         volumes:
           - "/var/run/docker.sock:/var/run/docker.sock"
         networks:
@@ -41,14 +37,8 @@
           placement:
             constraints: [node.role == manager]
 
-    - name: 설정된 외부 네트워크 'web' 확인
-      docker_network_info:
-        name: web
-      register: web_network_info
-
-    - name: 외부 네트워크 'web' 생성
+    - name: web 네트워크 생성
       docker_network:
         name: web
         driver: overlay
         state: present
-      when: web_network_info == {}
